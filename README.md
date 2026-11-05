@@ -11,6 +11,17 @@ combo (HID-over-GATT) under Linux:
 Both fixes are userspace, idempotent, and survive reboots. They do not patch
 the kernel or BlueZ.
 
+## The device
+
+[![Dexnor Magic-Style Keyboard Case for Microsoft Surface Pro 9](docs/images/dexnor-surface-pro-9.jpg)][product]
+
+The [Dexnor Magic-Style Keyboard Case for Microsoft Surface Pro 9][product] is
+a Bluetooth HID-over-GATT keyboard with a multi-touch trackpad. It presents as
+HID `05AC:0220`; these fixes target its keyboard and touchpad.
+
+*Product image © Dexnor, used here to identify the hardware. It is not covered
+by this repository's MIT license.*
+
 ## Tested on
 
 - Fedora 44 KDE, kernel `7.2.14-1.surface.fc44.x86_64`
@@ -102,3 +113,8 @@ sudo dnf install python3-dbus python3-gobject python3-evdev
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+The product image in `docs/images/` is © Dexnor and is not covered by the MIT
+license; it is included only to identify the hardware.
+
+[product]: https://www.dexnorcase.com/products/dexnor-magic-style-keyboard-case-for-microsoft-surface-pro-9-with-detachable-magnetic-cover-floating-cantilever-stand-multi-touch-trackpad-backlit-stylus-holder
