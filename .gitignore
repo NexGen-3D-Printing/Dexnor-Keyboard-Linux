@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Local logs / captures
+*.log
+*.raw
+*.snoop
+*.libinput
+
+# Installer backups
+*.bak
+*.bak-dexnor-fix
+
+# Editor / OS noise
+.DS_Store
+*.swp
+*~
