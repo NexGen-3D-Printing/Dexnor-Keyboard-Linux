@@ -13,13 +13,13 @@ Parameters, GATT characteristic `0x2A04`):
 |---|---|---|
 | Min connection interval | 6 | 7.5 ms |
 | Max connection interval | 6 | 7.5 ms |
-| Latency | 35 | may skip 35 of 36 events |
-| Supervision timeout | 200 | 2000 ms |
+| Latency | 0 | no skipped events |
+| Supervision timeout | 400 | 4000 ms (4 seconds) |
 
 BlueZ 5.76+ reads PPCP in `profiles/gap/gas.c:read_ppcp_cb()` and applies
-it via `btd_device_set_conn_param()`. Latency 35 is legal, so it is
-accepted. That gives the keyboard a ~270 ms window between chances to
-deliver a HID report, so fast typing loses press/release events.
+it via `btd_device_set_conn_param()`. Latency 0 means no skipped events,
+giving fast ~7.5 ms response time. The supervision timeout is 4 seconds
+(to accommodate occasional packet loss) instead of the original 2 seconds.
 
 Windows ignores PPCP, which is why the same keyboard works perfectly
 there. It is a Linux/BlueZ behaviour, not a hardware or firmware fault.
@@ -30,8 +30,11 @@ Force **latency 0** on the live LE connection, keeping the keyboard's own
 7.5 ms interval so the peripheral accepts the request:
 
 ```
-min=6 (7.5 ms)  max=6 (7.5 ms)  latency=0  timeout=200 (2 s)
+min=6 (7.5 ms)  max=6 (7.5 ms)  latency=0  timeout=400 (4 s)
 ```
+
+Also disables Bluetooth runtime power management for improved connection
+stability.
 
 Installed components:
 
@@ -42,16 +45,23 @@ Installed components:
 2. `/etc/systemd/system/bt-keyboard-latency.service`
    - runs `watch`, enabled at boot, restarts on failure
 3. `[ConnectionParameters]` in the BlueZ device info file
-   - `MinInterval=6`, `MaxInterval=6`, `Latency=0`, `Timeout=200`
+   - `MinInterval=6`, `MaxInterval=6`, `Latency=0`, `Timeout=400`
    - so the boot-time default is sane too
    - a backup is written next to it as `info.bak-dexnor-fix`
 
 ## Install
 
-Pair the keyboard first, then from the repo root:
+Pair the keyboard first, then from the repo root or using the downloaded
+script:
 
 ```bash
-sudo ./keyboard/install.sh
+~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh
+```
+
+Or with Bluetooth power management disabled:
+
+```bash
+DISABLE_BLUETOOTH_PM=1 ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh
 ```
 
 The script auto-detects the controller, the keyboard address and the HCI
@@ -61,13 +71,13 @@ restore the fix after an OS reinstall.
 If detection fails, pass the address explicitly:
 
 ```bash
-sudo KB_ADDR=AA:BB:CC:DD:EE:FF ./keyboard/install.sh
+KB_ADDR=AA:BB:CC:DD:EE:FF ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh
 ```
 
 Optional overrides (environment variables):
 
 ```bash
-sudo BT_MAX_INTERVAL=12 ./keyboard/install.sh   # 15 ms polling, lower battery use
+BT_MAX_INTERVAL=12 ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh   # 15 ms polling, lower battery use
 ```
 
 ## Verify
@@ -75,7 +85,7 @@ sudo BT_MAX_INTERVAL=12 ./keyboard/install.sh   # 15 ms polling, lower battery u
 ```bash
 systemctl status bt-keyboard-latency.service
 sudo journalctl -u bt-keyboard-latency.service -f
-sudo /usr/local/sbin/bt-keyboard-latency.py status
+sudo KB_ADDR=CA:77:D0:09:3C:00 /usr/local/sbin/bt-keyboard-latency.py status
 ```
 
 A successful apply logs:
@@ -94,7 +104,7 @@ sudo btmon | grep -A8 'LE Connection Update'
 ## Uninstall
 
 ```bash
-sudo ./keyboard/install.sh --uninstall
+~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh --uninstall
 ```
 
 This removes the service and the daemon. The `[ConnectionParameters]`
@@ -113,3 +123,18 @@ manually for a fully stock setup.
   (7.5 ms), which is what the keyboard itself requested.
 - The script needs `python3`, `python3-dbus`, `python3-gobject` and
   `libbluetooth` (all present on a normal Fedora KDE install).
+- Bluetooth runtime power management is disabled to improve connection
+  stability. To skip this, set `DISABLE_BLUETOOTH_PM=1`.
+
+## Power management and connection stability
+
+The Bluetooth adapter has runtime power management enabled by default,
+which can cause connection drops. The installer disables this:
+
+```bash
+echo "on" > /sys/class/bluetooth/hci0/power/control
+```
+
+If you experience connection timeouts, you can add this to a systemd unit
+or startup script. The keyboard's supervision timeout has also been
+increased from 2s to 4s to accommodate occasional packet loss.

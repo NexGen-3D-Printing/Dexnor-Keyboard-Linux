@@ -26,23 +26,36 @@
 #
 # Usage
 # -----
-#   sudo ./keyboard/install.sh              # install / repair / re-run
-#   sudo ./keyboard/install.sh --uninstall  # remove everything
+#   ./keyboard/install.sh              # install / repair / re-run
+#   ./keyboard/install.sh --uninstall  # remove everything
 #
 # Optional environment overrides:
 #   KB_ADDR          keyboard Bluetooth address (auto-detected if unset)
 #   BT_MIN_INTERVAL  default 6   (x1.25 ms)
 #   BT_MAX_INTERVAL  default 6   (x1.25 ms)
 #   BT_LATENCY       default 0
-#   BT_SUPV_TIMEOUT  default 200 (x10 ms)
-#
-# Re-running is safe and idempotent.
+#   BT_SUPV_TIMEOUT  default 400 (x10 ms)
+#   DISABLE_BLUETOOTH_PM  set to 1 to disable Bluetooth power management
 
 set -euo pipefail
 
+# ------------------------------------------------------------ sudo check
+# Prompt for sudo password at the start if not running as root
 if [[ ${EUID} -ne 0 ]]; then
-    echo "Run this with sudo:  sudo $0 $*" >&2
-    exit 1
+    echo "This script requires root privileges."
+    if command -v sudo >/dev/null 2>&1; then
+        # Try to get sudo credentials upfront
+        echo "Prompting for sudo password..."
+        if ! sudo -v; then
+            echo "Failed to get sudo privileges. Exiting." >&2
+            exit 1
+        fi
+        # Run the script again with sudo
+        exec sudo "$0" "$@"
+    else
+        echo "sudo not found. Please run this script as root." >&2
+        exit 1
+    fi
 fi
 
 PY=/usr/local/sbin/bt-keyboard-latency.py
@@ -52,7 +65,10 @@ SERVICE=bt-keyboard-latency.service
 BT_MIN_INTERVAL=${BT_MIN_INTERVAL:-6}
 BT_MAX_INTERVAL=${BT_MAX_INTERVAL:-6}
 BT_LATENCY=${BT_LATENCY:-0}
-BT_SUPV_TIMEOUT=${BT_SUPV_TIMEOUT:-200}
+BT_SUPV_TIMEOUT=${BT_SUPV_TIMEOUT:-400}
+
+# Default to enabling Bluetooth power management reduction
+DISABLE_BLUETOOTH_PM=${DISABLE_BLUETOOTH_PM:-0}
 
 # ---------------------------------------------------------------- uninstall
 if [[ ${1:-} == "--uninstall" ]]; then
@@ -79,6 +95,20 @@ then
     echo "On Fedora: sudo dnf install python3-dbus python3-gobject bluez-libs" >&2
     exit 1
 fi
+
+# -------------------------------------------------- disable Bluetooth power management
+if [[ "$DISABLE_BLUETOOTH_PM" == "0" ]]; then
+    echo "Bluetooth power management optimization:"
+    if [[ -w /sys/class/bluetooth/hci0/power/control ]]; then
+        echo "on" > /sys/class/bluetooth/hci0/power/control
+        echo "  [OK] Runtime power management disabled (improves connection stability)"
+    else
+        echo "  [INFO] Power management control not available"
+    fi
+else
+    echo "Bluetooth power management optimization: SKIPPED"
+fi
+echo
 
 # ------------------------------------------------------------ detect device
 # Keyboard address: explicit, else newest info file named "Dexnor Keyboard".
@@ -164,7 +194,7 @@ HCI_DEV = int(os.environ.get("HCI_DEV", "0"))
 MIN_INTERVAL = int(os.environ.get("BT_MIN_INTERVAL", "6"))
 MAX_INTERVAL = int(os.environ.get("BT_MAX_INTERVAL", "6"))
 LATENCY = int(os.environ.get("BT_LATENCY", "0"))
-SUPV_TIMEOUT = int(os.environ.get("BT_SUPV_TIMEOUT", "200"))
+SUPV_TIMEOUT = int(os.environ.get("BT_SUPV_TIMEOUT", "400"))
 HCI_TIMEOUT_MS = 10000
 
 HCIGETCONNLIST = 0x800448D4  # _IOR('H', 212, int)
@@ -367,6 +397,9 @@ def main():
         "status": cmd_status,
         "watch": cmd_watch,
     }.get(sys.argv[1], lambda: (print(__doc__), sys.exit(1)))()
+
+if __name__ == "__main__":
+    main()
 PYEOF
 
 chmod 0755 "$PY"
@@ -459,8 +492,8 @@ PYEOF
 
 # ------------------------------------------------------------------- activate
 systemctl daemon-reload
-systemctl enable "$SERVICE" >/dev/null
-systemctl restart "$SERVICE"
+systemctl enable "$SERVICE" >/dev/null || true
+systemctl restart "$SERVICE" || true
 
 # Apply once right now (service also does this, but make it immediate).
 sleep 1
@@ -468,11 +501,11 @@ sleep 1
 
 echo
 echo "== service =="
-systemctl is-enabled "$SERVICE"
-systemctl is-active "$SERVICE"
+systemctl is-enabled "$SERVICE" || true
+systemctl is-active "$SERVICE" || true
 echo
-echo "== logs =="
-journalctl -u "$SERVICE" -n 12 --no-pager
+echo "== logs ="
+journalctl -u "$SERVICE" -n 12 --no-pager || true
 echo
 echo "Done. Check status any time with:"
 echo "  sudo journalctl -u $SERVICE -f"

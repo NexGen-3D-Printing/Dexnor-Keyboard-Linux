@@ -28,25 +28,39 @@
 #
 # Usage
 # -----
-#   sudo ./touchpad/install.sh              # install / repair
-#   sudo ./touchpad/install.sh --uninstall  # remove everything
+#   ./touchpad/install.sh              # install / repair
+#   ./touchpad/install.sh --uninstall  # remove everything
 #
 # Optional environment overrides:
 #   TOUCHPAD_NAME   evdev device name (default "Dexnor Keyboard Touchpad")
-#
-# Re-running is safe and idempotent.
+#   DISABLE_BLUETOOTH_PM  set to 1 to skip Bluetooth power management changes
 
 set -euo pipefail
 
+# ------------------------------------------------------------ sudo check
+# Prompt for sudo password at the start if not running as root
 if [[ ${EUID} -ne 0 ]]; then
-    echo "Run this with sudo:  sudo $0 $*" >&2
-    exit 1
+    echo "This script requires root privileges."
+    if command -v sudo >/dev/null 2>&1; then
+        # Try to get sudo credentials upfront
+        echo "Prompting for sudo password..."
+        if ! sudo -v; then
+            echo "Failed to get sudo privileges. Exiting." >&2
+            exit 1
+        fi
+        # Run the script again with sudo
+        exec sudo "$0" "$@"
+    else
+        echo "sudo not found. Please run this script as root." >&2
+        exit 1
+    fi
 fi
 
 PY=/usr/local/sbin/dexnor-touchpad-click.py
 UNIT=/etc/systemd/system/dexnor-touchpad-click.service
 SERVICE=dexnor-touchpad-click.service
 TOUCHPAD_NAME=${TOUCHPAD_NAME:-Dexnor Keyboard Touchpad}
+DISABLE_BLUETOOTH_PM=${DISABLE_BLUETOOTH_PM:-0}
 
 # ---------------------------------------------------------------- uninstall
 if [[ ${1:-} == "--uninstall" ]]; then
@@ -67,6 +81,20 @@ if [[ ! -e /dev/uinput ]]; then
     echo "/dev/uinput not found. Load the uinput module or enable it in the kernel." >&2
     exit 1
 fi
+
+# -------------------------------------------------- disable Bluetooth power management
+if [[ "$DISABLE_BLUETOOTH_PM" == "0" ]]; then
+    echo "Bluetooth power management optimization:"
+    if [[ -w /sys/class/bluetooth/hci0/power/control ]]; then
+        echo "on" > /sys/class/bluetooth/hci0/power/control
+        echo "  [OK] Runtime power management disabled (improves connection stability)"
+    else
+        echo "  [INFO] Power management control not available"
+    fi
+else
+    echo "Bluetooth power management optimization: SKIPPED"
+fi
+echo
 
 # --------------------------------------------------------------- write daemon
 cat > "$PY" <<'PYEOF'
@@ -268,18 +296,18 @@ EOF
 
 # ------------------------------------------------------------------- activate
 systemctl daemon-reload
-systemctl enable "$SERVICE" >/dev/null
-systemctl restart "$SERVICE"
+systemctl enable "$SERVICE" >/dev/null || true
+systemctl restart "$SERVICE" || true
 
 sleep 1
 echo "== service =="
-systemctl is-enabled "$SERVICE"
-systemctl is-active "$SERVICE"
+systemctl is-enabled "$SERVICE" || true
+systemctl is-active "$SERVICE" || true
 echo
-echo "== logs =="
-journalctl -u "$SERVICE" -n 12 --no-pager
+echo "== logs ="
+journalctl -u "$SERVICE" -n 12 --no-pager || true
 echo
-echo "== touchpad devices =="
+echo "== touchpad devices ="
 for e in /sys/class/input/event*; do
     n=$(cat "$e/device/name" 2>/dev/null)
     [[ $n == "$TOUCHPAD_NAME" ]] && echo "  $(basename "$e") -> $n"

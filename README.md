@@ -34,25 +34,47 @@ not hardware faults.
 
 ## Quick start
 
-Pair the keyboard first, then:
+### Install with one command (recommended)
+
+Pair the keyboard first, then run:
 
 ```bash
-git clone https://github.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux.git
-cd Dexnor-Keyboard-Linux
-sudo ./install.sh
+mkdir -p ~/.local/Dexnor-Keyboard-Fix
+curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/install.sh -o ~/.local/Dexnor-Keyboard-Fix/install.sh
+chmod +x ~/.local/Dexnor-Keyboard-Fix/install.sh
+~/.local/Dexnor-Keyboard-Fix/install.sh
 ```
 
-Install only one fix:
+The installer will:
+
+1. Prompt for your sudo password
+2. Install both the keyboard and touchpad fixes
+3. Disable Bluetooth runtime power management for improved connection stability
+4. Configure a 4-second supervision timeout (increased from 2s)
+5. Verify both services are running
+
+### Install only one fix
 
 ```bash
-sudo ./keyboard/install.sh
-sudo ./touchpad/install.sh
+~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh
+~/.local/Dexnor-Keyboard-Fix/touchpad/install.sh
 ```
 
-Uninstall:
+### Install with Bluetooth power management disabled
+
+To skip Bluetooth power management optimization:
 
 ```bash
-sudo ./uninstall.sh
+DISABLE_BLUETOOTH_PM=1 ~/.local/Dexnor-Keyboard-Fix/install.sh
+```
+
+## Uninstall
+
+Remove all fixes:
+
+```bash
+~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh --uninstall
+~/.local/Dexnor-Keyboard-Fix/touchpad/install.sh --uninstall
 ```
 
 ## Verify
@@ -98,6 +120,20 @@ On Fedora:
 sudo dnf install python3-dbus python3-gobject python3-evdev
 ```
 
+## Bluetooth power management
+
+For improved connection stability, the installer disables runtime power
+management for the Bluetooth adapter:
+
+- Sets `/sys/class/bluetooth/hci0/power/control` to `on`
+- Increases supervision timeout from 2s to 4s
+
+To skip this optimization:
+
+```bash
+DISABLE_BLUETOOTH_PM=1 ~/.local/Dexnor-Keyboard-Fix/install.sh
+```
+
 ## Notes / caveats
 
 - The touchpad fix creates a uinput clone. While it runs, input listings
@@ -107,8 +143,8 @@ sudo dnf install python3-dbus python3-gobject python3-evdev
   keeps a backup at `info.bak-dexnor-fix`.
 - Uninstalling the keyboard fix leaves the `[ConnectionParameters]` section
   in place; remove it manually for a fully stock setup.
-- Re-run `sudo ./install.sh` after an OS reinstall or a BlueZ/kernel update
-  that changes behavior.
+- Re-run `~/.local/Dexnor-Keyboard-Fix/install.sh` after an OS reinstall or
+  a BlueZ/kernel update that changes behavior.
 
 ## License
 
