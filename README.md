@@ -40,15 +40,24 @@ not hardware faults.
 Pair the keyboard first, then run:
 
 ```bash
-git clone https://github.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux.git ~/.local/Dexnor-Keyboard-Fix && ~/.local/Dexnor-Keyboard-Fix/install.sh
+git clone git@github.com:NexGen-3D-Printing/Dexnor-Keyboard-Linux.git ~/.local/Dexnor-Keyboard-Fix && ~/.local/Dexnor-Keyboard-Fix/install.sh
 ```
 
 Or run from within the repo directory:
 
 ```bash
-git clone https://github.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux.git
+git clone git@github.com:NexGen-3D-Printing/Dexnor-Keyboard-Linux.git
 cd Dexnor-Keyboard-Linux
 ./install.sh
+```
+
+### Installing from a URL (without git)
+
+If you don't have git installed:
+
+```bash
+curl -fsSL https://github.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/archive/refs/heads/main.tar.gz | tar -xz -C ~/.local --strip-components=1
+~/.local/Dexnor-Keyboard-Fix/install.sh
 ```
 
 The installer will:
