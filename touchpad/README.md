@@ -63,8 +63,13 @@ From the repo root:
 ```bash
 mkdir -p ~/.local/Dexnor-Keyboard-Fix && \
 curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/touchpad/install.sh -o ~/.local/Dexnor-Keyboard-Fix/touchpad/install.sh && \
-chmod +x ~/.local/Dexnor-Keyboard-Fix/touchpad/install.sh && \
 ~/.local/Dexnor-Keyboard-Fix/touchpad/install.sh
+```
+
+Or as a one-liner:
+
+```bash
+mkdir -p ~/.local/Dexnor-Keyboard-Fix && curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/touchpad/install.sh -o ~/.local/Dexnor-Keyboard-Fix/touchpad/install.sh && ~/.local/Dexnor-Keyboard-Fix/touchpad/install.sh
 ```
 
 Re-running is safe and idempotent. It also works on a second machine with

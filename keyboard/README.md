@@ -57,14 +57,13 @@ script:
 ```bash
 mkdir -p ~/.local/Dexnor-Keyboard-Fix && \
 curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/keyboard/install.sh -o ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh && \
-chmod +x ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh && \
 ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh
 ```
 
 Or as a one-liner:
 
 ```bash
-mkdir -p ~/.local/Dexnor-Keyboard-Fix && curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/keyboard/install.sh -o ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh && chmod +x ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh && ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh
+mkdir -p ~/.local/Dexnor-Keyboard-Fix && curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/keyboard/install.sh -o ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh && ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh
 ```
 
 To skip Bluetooth power management optimization:

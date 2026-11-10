@@ -41,14 +41,13 @@ Pair the keyboard first, then run:
 ```bash
 mkdir -p ~/.local/Dexnor-Keyboard-Fix && \
 curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/install.sh -o ~/.local/Dexnor-Keyboard-Fix/install.sh && \
-chmod +x ~/.local/Dexnor-Keyboard-Fix/install.sh && \
 ~/.local/Dexnor-Keyboard-Fix/install.sh
 ```
 
 Or as a single one-liner:
 
 ```bash
-mkdir -p ~/.local/Dexnor-Keyboard-Fix && curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/install.sh -o ~/.local/Dexnor-Keyboard-Fix/install.sh && chmod +x ~/.local/Dexnor-Keyboard-Fix/install.sh && ~/.local/Dexnor-Keyboard-Fix/install.sh
+mkdir -p ~/.local/Dexnor-Keyboard-Fix && curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/install.sh -o ~/.local/Dexnor-Keyboard-Fix/install.sh && ~/.local/Dexnor-Keyboard-Fix/install.sh
 ```
 
 The installer will:
