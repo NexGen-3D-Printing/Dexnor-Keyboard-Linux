@@ -61,7 +61,10 @@ Installed components:
 From the repo root:
 
 ```bash
-sudo ./touchpad/install.sh
+mkdir -p ~/.local/Dexnor-Keyboard-Fix && \
+curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/touchpad/install.sh -o ~/.local/Dexnor-Keyboard-Fix/touchpad/install.sh && \
+chmod +x ~/.local/Dexnor-Keyboard-Fix/touchpad/install.sh && \
+~/.local/Dexnor-Keyboard-Fix/touchpad/install.sh
 ```
 
 Re-running is safe and idempotent. It also works on a second machine with
@@ -70,7 +73,7 @@ the same keyboard.
 If the evdev name differs, override it:
 
 ```bash
-sudo TOUCHPAD_NAME="Some Other Touchpad" ./touchpad/install.sh
+TOUCHPAD_NAME="Some Other Touchpad" ~/.local/Dexnor-Keyboard-Fix/touchpad/install.sh
 ```
 
 ## Verify
