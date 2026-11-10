@@ -116,15 +116,20 @@ See [docs/diagnosis.md](docs/diagnosis.md) for the HID report layout,
 
 - Fedora/KDE (tested); should work on any Linux with systemd, BlueZ and
   libinput.
-- `git`
 - `python3`
 - Keyboard fix: `python3-dbus`, `python3-gobject`, `libbluetooth`
 - Touchpad fix: `python3-evdev`, `/dev/uinput`
 
-On Fedora:
+On Fedora/Bazzite, all dependencies are already installed. For other distros:
 
+**Debian/Ubuntu:**
 ```bash
-sudo dnf install git python3-dbus python3-gobject python3-evdev
+sudo apt install python3-dbus python3-gi libbluetooth-dev python3-evdev
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S python-dbus python-gobject bluez-libs python-evdev
 ```
 
 ## Bluetooth power management
