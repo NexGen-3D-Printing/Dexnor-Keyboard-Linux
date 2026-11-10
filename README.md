@@ -40,7 +40,15 @@ not hardware faults.
 Pair the keyboard first, then run:
 
 ```bash
-mkdir -p ~/.local/Dexnor-Keyboard-Fix && curl -fsSL https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/install.sh -o ~/.local/Dexnor-Keyboard-Fix/install.sh && chmod +x ~/.local/Dexnor-Keyboard-Fix/install.sh && ~/.local/Dexnor-Keyboard-Fix/install.sh
+git clone https://github.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux.git ~/.local/Dexnor-Keyboard-Fix && ~/.local/Dexnor-Keyboard-Fix/install.sh
+```
+
+Or run from within the repo directory:
+
+```bash
+git clone https://github.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux.git
+cd Dexnor-Keyboard-Linux
+./install.sh
 ```
 
 The installer will:
@@ -108,6 +116,7 @@ See [docs/diagnosis.md](docs/diagnosis.md) for the HID report layout,
 
 - Fedora/KDE (tested); should work on any Linux with systemd, BlueZ and
   libinput.
+- `git`
 - `python3`
 - Keyboard fix: `python3-dbus`, `python3-gobject`, `libbluetooth`
 - Touchpad fix: `python3-evdev`, `/dev/uinput`
@@ -115,7 +124,7 @@ See [docs/diagnosis.md](docs/diagnosis.md) for the HID report layout,
 On Fedora:
 
 ```bash
-sudo dnf install python3-dbus python3-gobject python3-evdev
+sudo dnf install git python3-dbus python3-gobject python3-evdev
 ```
 
 ## Bluetooth power management

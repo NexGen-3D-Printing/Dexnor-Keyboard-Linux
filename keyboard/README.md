@@ -51,11 +51,10 @@ Installed components:
 
 ## Install
 
-Pair the keyboard first, then from the repo root or using the downloaded
-script:
+From the repo root:
 
 ```bash
-mkdir -p ~/.local/Dexnor-Keyboard-Fix && curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/keyboard/install.sh -o ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh -L && chmod +x ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh && ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh
+~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh
 ```
 
 To skip Bluetooth power management optimization:
