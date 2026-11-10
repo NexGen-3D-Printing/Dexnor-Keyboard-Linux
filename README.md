@@ -40,8 +40,10 @@ not hardware faults.
 Pair the keyboard first, then run:
 
 ```bash
-mkdir -p ~/.local/Dexnor-Keyboard-Fix && curl -fsS https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/install.sh -o ~/.local/Dexnor-Keyboard-Fix/install.sh -L && chmod +x ~/.local/Dexnor-Keyboard-Fix/install.sh && ~/.local/Dexnor-Keyboard-Fix/install.sh
+mkdir -p ~/.local/Dexnor-Keyboard-Fix && wget -qO- https://raw.githubusercontent.com/NexGen-3D-Printing/Dexnor-Keyboard-Linux/main/install.sh > ~/.local/Dexnor-Keyboard-Fix/install.sh && chmod +x ~/.local/Dexnor-Keyboard-Fix/install.sh && ~/.local/Dexnor-Keyboard-Fix/install.sh
 ```
+
+The `-qO-` option downloads the file and preserves its executable bit from the repo.
 
 The installer will:
 
