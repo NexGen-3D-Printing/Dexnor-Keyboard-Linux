@@ -24,7 +24,8 @@ by this repository's MIT license.*
 
 ## Tested on
 
-- Fedora 44 KDE, kernel `7.2.14-1.surface.fc44.x86_64`
+- Fedora 44 KDE
+- Bazzite 45
 - BlueZ 5.87
 - Surface Pro 9
 - Dexnor Bluetooth keyboard/touchpad combo (HID `05AC:0220`)
