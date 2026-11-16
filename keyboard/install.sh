@@ -387,7 +387,10 @@ def cmd_watch():
             if current_mac and current_mac.upper() != KB_ADDR.upper():
                 print(f"[AUTO-FIX] MAC mismatch: expected {KB_ADDR}, found {current_mac}", flush=True)
                 print("[AUTO-FIX] Running installer to update configuration...", flush=True)
-                install_script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "keyboard", "install.sh")
+                # Installer is typically in ~/.local/Dexnor-Keyboard-Fix/keyboard/install.sh
+                # or in the repo directory where the user cloned it
+                user_home = os.path.expanduser("~")
+                install_script = os.path.join(user_home, ".local", "Dexnor-Keyboard-Fix", "keyboard", "install.sh")
                 if os.path.exists(install_script):
                     subprocess.Popen(
                         ["sudo", install_script],
