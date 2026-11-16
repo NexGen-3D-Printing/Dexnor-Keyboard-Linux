@@ -376,15 +376,20 @@ def cmd_watch():
             if dd < 0:
                 return
             
-            # Get current MAC from first connected device
+            # Check if the keyboard is connected and get its MAC from HCI
+            # Only report mismatch if keyboard is connected with a different MAC
+            keyboard_connected = False
             current_mac = None
             for handle, addr, ctype, state in get_connections(lib, dd):
-                current_mac = addr
-                break
+                if addr.upper() == KB_ADDR.upper():
+                    keyboard_connected = True
+                    current_mac = addr
+                    break
             
             lib.hci_close_dev(dd)
             
-            if current_mac and current_mac.upper() != KB_ADDR.upper():
+            # If keyboard is connected but MAC doesn't match, it's a mismatch
+            if keyboard_connected and current_mac and current_mac.upper() != KB_ADDR.upper():
                 print(f"[AUTO-FIX] MAC mismatch: expected {KB_ADDR}, found {current_mac}", flush=True)
                 print("[AUTO-FIX] Running installer to update configuration...", flush=True)
                 # Try multiple possible locations for the installer
