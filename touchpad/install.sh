@@ -294,12 +294,27 @@ Environment="TOUCHPAD_NAME=$TOUCHPAD_NAME"
 WantedBy=multi-user.target
 EOF
 
+# --------------------------------------------------- check for device name change
+OLD_NAME=""
+if [[ -f "$UNIT" ]]; then
+    OLD_NAME=$(grep "^Environment=" "$UNIT" 2>/dev/null | grep "TOUCHPAD_NAME" | sed 's/.*TOUCHPAD_NAME=\(.*\)/\1/' | tr -d '"' | head -1)
+fi
+
+if [[ -n "$OLD_NAME" && "$OLD_NAME" != "$TOUCHPAD_NAME" ]]; then
+    echo
+    echo "[UPDATE] Touchpad name changed from \"$OLD_NAME\" to \"$TOUCHPAD_NAME\""
+    echo "  Updating service configuration..."
+fi
+
 # ------------------------------------------------------------------- activate
 systemctl daemon-reload
 systemctl enable "$SERVICE" >/dev/null || true
 systemctl restart "$SERVICE" || true
 
 sleep 1
+if [[ -n "$OLD_NAME" && "$OLD_NAME" != "$TOUCHPAD_NAME" ]]; then
+    echo "[UPDATE] Touchpad name updated from \"$OLD_NAME\" to \"$TOUCHPAD_NAME\""
+fi
 echo "== service =="
 systemctl is-enabled "$SERVICE" || true
 systemctl is-active "$SERVICE" || true

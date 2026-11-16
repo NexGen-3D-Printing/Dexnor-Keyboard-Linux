@@ -490,6 +490,18 @@ for path in paths:
     print("updated %s" % path)
 PYEOF
 
+# --------------------------------------------------- check for MAC address change
+OLD_KB_ADDR=""
+if [[ -f "$UNIT" ]]; then
+    OLD_KB_ADDR=$(grep "^Environment=KB_ADDR=" "$UNIT" 2>/dev/null | sed 's/Environment=KB_ADDR=//' | tr -d '"' | head -1)
+fi
+
+if [[ -n "$OLD_KB_ADDR" && "$OLD_KB_ADDR" != "$KB_ADDR" ]]; then
+    echo
+    echo "[UPDATE] MAC address changed from $OLD_KB_ADDR to $KB_ADDR"
+    echo "  Updating service configuration..."
+fi
+
 # ------------------------------------------------------------------- activate
 systemctl daemon-reload
 systemctl enable "$SERVICE" >/dev/null || true
@@ -507,6 +519,9 @@ echo
 echo "== logs ="
 journalctl -u "$SERVICE" -n 12 --no-pager || true
 echo
+if [[ -n "$OLD_KB_ADDR" && "$OLD_KB_ADDR" != "$KB_ADDR" ]]; then
+    echo "[UPDATE] MAC address updated from $OLD_KB_ADDR to $KB_ADDR"
+fi
 echo "Done. Check status any time with:"
 echo "  sudo journalctl -u $SERVICE -f"
 echo "  sudo KB_ADDR=$KB_ADDR $PY status"
