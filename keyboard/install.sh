@@ -366,6 +366,47 @@ def cmd_watch():
             print("keyboard connected, scheduling override", flush=True)
             schedule(4.0, "after-connect")
             GLib.timeout_add(12000, lambda: (schedule(0.1, "reassert"), False)[1])
+    
+    def check_mac_mismatch():
+        """Check if we're watching the correct MAC address and re-run installer if not."""
+        try:
+            import subprocess
+            lib = load_lib()
+            dd = lib.hci_open_dev(HCI_DEV)
+            if dd < 0:
+                return
+            
+            # Get current MAC from first connected device
+            current_mac = None
+            for handle, addr, ctype, state in get_connections(lib, dd):
+                current_mac = addr
+                break
+            
+            lib.hci_close_dev(dd)
+            
+            if current_mac and current_mac.upper() != KB_ADDR.upper():
+                print(f"[AUTO-FIX] MAC mismatch: expected {KB_ADDR}, found {current_mac}", flush=True)
+                print("[AUTO-FIX] Running installer to update configuration...", flush=True)
+                install_script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "keyboard", "install.sh")
+                if os.path.exists(install_script):
+                    subprocess.Popen(
+                        ["sudo", install_script],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        start_new_session=True
+                    )
+                else:
+                    print(f"[AUTO-FIX] Could not find installer at {install_script}", flush=True)
+        except Exception as e:
+            pass  # Silent fail if detection fails
+    
+    def check_mac_mismatch_periodic():
+        """Check for MAC mismatch every 60 seconds."""
+        check_mac_mismatch()
+        GLib.timeout_add(60000, check_mac_mismatch_periodic)
+    
+    # Start the periodic MAC check
+    GLib.timeout_add(60000, check_mac_mismatch_periodic)
 
     bus.add_signal_receiver(
         on_props,
@@ -385,6 +426,10 @@ def cmd_watch():
         print("startup check: %s" % e, flush=True)
 
     print("watching for %s ..." % KB_ADDR, flush=True)
+    
+    # Initial check
+    check_mac_mismatch()
+    
     GLib.MainLoop().run()
 
 
